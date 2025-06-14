@@ -1,0 +1,40 @@
+{
+  "name": "gitwrite-api",
+  "version": "1.0.0",
+  "description": "Have your product readme file generated with ease",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Laksii-fr/GitWrite-API.git"
+  },
+  "author": "Laksii-fr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Laksii-fr/GitWrite-API/issues"
+  },
+  "homepage": "https://github.com/Laksii-fr/GitWrite-API#readme",
+  "dependencies": {
+    "@langchain/core": "^0.3.58",
+    "@langchain/openai": "^0.5.13",
+    "axios": "^1.10.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.2",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  },
+  "keywords": []
+}

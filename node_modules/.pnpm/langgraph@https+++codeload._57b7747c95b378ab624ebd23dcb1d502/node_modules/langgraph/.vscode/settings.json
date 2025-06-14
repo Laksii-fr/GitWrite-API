@@ -1,0 +1,11 @@
+{
+  "cSpell.words": [
+    "agentic",
+    "checkpointer",
+    "Checkpointers",
+    "Pregel",
+    "Scrapybara"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "python.languageServer": "None"
+}
