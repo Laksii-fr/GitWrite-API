@@ -17,32 +17,32 @@ async function handleGithubData(profile) {
     }
 
     console.log("Saving GitHub data for user:", profile.username || profile._json?.login);
-    
-    const savedUser = await SaveGithubData(profile);
-    
-    if (!savedUser) {
-      throw new Error("Failed to save user data to database");
-    }
 
+    // Try to save or update user data
+    const savedUser = await SaveGithubData(profile);
+
+    // If user already exists, SaveGithubData should return the existing user
     // Generate JWT token with githubId
     const token = generateToken({ githubId: profile.id });
-    
+
     if (!token) {
       throw new Error("Failed to generate JWT token");
     }
 
-    console.log("GitHub data saved successfully for user:", savedUser.username);
-    
-    return { 
-      success: true, 
-      message: "GitHub data saved successfully.",
+    console.log("GitHub data processed successfully for user:", savedUser.username);
+
+    return {
+      success: true,
+      message: savedUser.isNewUser
+        ? "GitHub data saved successfully."
+        : "GitHub user already exists. New token generated.",
       token: token,
       githubId: profile.id
     };
   } catch (error) {
     console.error("Error in handleGithubData:", error);
-    return { 
-      success: false, 
+    return {
+      success: false,
       message: `Failed to save GitHub data: ${error.message}`,
       error: error.message
     };

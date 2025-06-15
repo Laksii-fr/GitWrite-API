@@ -33,21 +33,38 @@ export async function SaveGithubData(profile) {
 
     console.log("Saving GitHub data for user:", profile);
 
-    const newUser = new User({
-      githubId: profile.id,
-      username: profile.username || _json.login,
-      name: profile.displayName || _json.name || "",
-      email: _json.email,
-      profileUrl: _json.html_url,
-      avatarUrl: _json.avatar_url,
-      accessToken: profile.accessToken,
-      credit_tokens: 5,
-    });
+    // Check if user already exists
+    let user = await User.findOne({ githubId: profile.id });
 
-    const savedUser = await newUser.save();
-    console.log("GitHub data saved successfully:", savedUser);
-    return savedUser;
+    if (user) {
+      // Update existing user with new data and token
+      user.username = profile.username || _json.login;
+      user.name = profile.displayName || _json.name || "";
+      user.email = _json.email;
+      user.profileUrl = _json.html_url;
+      user.avatarUrl = _json.avatar_url;
+      user.accessToken = profile.accessToken;
+      // Optionally update credit_tokens if you want to reset or increment
+      await user.save();
+      console.log("GitHub data updated successfully:", user);
+      return user;
+    } else {
+      // Create new user
+      const newUser = new User({
+        githubId: profile.id,
+        username: profile.username || _json.login,
+        name: profile.displayName || _json.name || "",
+        email: _json.email,
+        profileUrl: _json.html_url,
+        avatarUrl: _json.avatar_url,
+        accessToken: profile.accessToken,
+        credit_tokens: 5,
+      });
 
+      const savedUser = await newUser.save();
+      console.log("GitHub data saved successfully:", savedUser);
+      return savedUser;
+    }
   } catch (error) {
     console.error("Error saving GitHub data:", error.message);
     throw new Error(`Error saving GitHub data: ${error.message}`);

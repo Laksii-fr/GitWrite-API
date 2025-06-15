@@ -1,6 +1,6 @@
 import express from 'express';
 import { generateReadme } from '../controllers/readmeGenerator.js';
-import { authMiddleware } from '../middlewares/authmiddleware.js';
+import { authMiddleware } from '../middlewares/authMiddleware.js';
 const router = express.Router(); 
 
 // Health check route (no authentication required)

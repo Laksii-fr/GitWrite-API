@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { getUserRepos, CommitGitReadme, getUserReadmes } from '../controllers/gitOperations.js';
-import { authMiddleware } from '../middlewares/authmiddleware.js';
+import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 // Simple test route to verify git operations routes are working
 router.get("/test", (req, res) => {
@@ -126,27 +126,27 @@ router.post("/commit-readme", authMiddleware, async (req, res) => {
     }
 });
 
-// router.get("/get-all-readmes", authMiddleware, async (req, res) => {
-//     console.log('get-all-readmes route called');
-//     console.log('Request query:', req.query);
-//     console.log('Request headers:', req.headers);
+router.get("/get-all-readmes", authMiddleware, async (req, res) => {
+    console.log('get-all-readmes route called');
+    console.log('Request query:', req.query);
+    console.log('Request headers:', req.headers);
     
-//     const { githubId } = req.user;
+    const { githubId } = req.user;
     
-//     try {
-//         const repos = await getUserReadmes(githubId);
-//         if (!repos || repos.length === 0) {
-//             return res.status(404).json({ message: "No repositories found for this user." });
-//         }
-//         return res.status(200).json({
-//       Status: 'Success',
-//       message: 'Repositories fetched successfully',
-//       Data: repos
-//     });
-//     } catch (err) {
-//         console.error("Error fetching repos:", err.message);
-//         return res.status(500).json({ error: "Failed to fetch repositories" });
-//     }
-// });
+    try {
+        const repos = await getUserReadmes(githubId);
+        if (!repos || repos.length === 0) {
+            return res.status(404).json({ message: "No repositories found for this user." });
+        }
+        return res.status(200).json({
+      Status: 'Success',
+      message: 'Repositories fetched successfully',
+      Data: repos
+    });
+    } catch (err) {
+        console.error("Error fetching repos:", err.message);
+        return res.status(500).json({ error: "Failed to fetch repositories" });
+    }
+});
 
 export default router;

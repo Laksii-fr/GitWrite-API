@@ -87,12 +87,15 @@ router.get("/auth/callback",
 
       // Success - return JWT token and user data
       console.log(`GitHub OAuth successful for user: ${profile.username} (ID: ${profile.id})`);
-      return res.status(200).json({
-        success: true,
-        message: "GitHub OAuth successful",
-        token: data.token,
-        githubId: data.githubId
-      });
+      res.cookie("token", data.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // set to true in production
+      sameSite: "Lax", // or "Strict" / "None" depending on frontend-backend domain
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    // Redirect or send a success page/message
+    return res.redirect("http://localhost:3000/dashboard");
 
     } catch (error) {
       console.error("GitHub callback error:", error);
