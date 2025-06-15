@@ -31,14 +31,14 @@ app.use(passport.session());
 
 // 4) Routes
 console.log('2) Initializing routes...');
-import authRoutes from './routes/auth.js';
-app.use('/api/auth', authRoutes);
 import githubRoutes from './routes/githubAuth.js';
 app.use('/api/github', githubRoutes);
 import gitOperationsRoutes from "./routes/gitOperations.js";
 app.use("/api/git", gitOperationsRoutes);
 import readmeGenerator from "./routes/readmeGenerator.js";
-app.use("/api", readmeGenerator);
+app.use("/api/ai", readmeGenerator);
+import profileRoutes from "./routes/profile.js";
+app.use("/api/profile", profileRoutes);
 console.log('3) Routes initialized');
 // 5) Server Start
 const PORT = process.env.PORT || 5000;

@@ -1,57 +1,20 @@
 import User from '../models/UserModels.js'; // Adjust path as needed
 import GitRepo from '../models/GitModels.js';
-import bcrypt from 'bcryptjs';
-import { generate_recoveryToken } from '../helpers/auth_helper.js';
 
-export const SaveUser = async ({ subId, username, password }) => {
+// Get user by githubId
+export const getUserByGithubId = async (githubId) => {
   try {
-    const newUser = new User({ subId, username, password, recoveryToken: await generate_recoveryToken() });
-    const savedUser = await newUser.save();
-    return savedUser;
-  } catch (error) {
-    throw new Error(`Error saving user: ${error.message}`);
-  }
-};
-
-export const checkUserCredentials = async ({ username, password }) => {
-  try {
-    const user = await User.findOne({ username });
-    if (!user) return false;
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    return isMatch;
-  } catch (error) {
-    throw new Error(`Error checking credentials: ${error.message}`);
-  }
-};
-
-export const get_subid_by_username = async (username) => {
-  try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ githubId });
     if (!user) {
-      throw new Error('User not found');
+      throw new Error(`User with githubId ${githubId} not found`);
     }
-    return user.subId;
+    return user;
   } catch (error) {
-    throw new Error(`Error retrieving subId: ${error.message}`);
+    throw new Error(`Error retrieving user: ${error.message}`);
   }
 };
 
-export const checkUserReoveryToken = async (username, recovery_token) => {
-  try {
-    const user = await User.findOne({ username, recoveryToken: recovery_token });
-    if (!user) {
-      throw new Error('Invalid recovery token');
-    } else {
-      console.log(`Recovery token for user ${username} is valid.`); 
-      return true;
-    }
-  } catch (error) {
-    throw new Error(`Error checking recovery token: ${error.message}`);
-  }
-};
-
-//get github id by username
+//get github id by username (keeping for backward compatibility if needed)
 export const getGithubIdByUsername = async (username) => {
   try {
     const user = await User.findOne({ username });
@@ -64,22 +27,6 @@ export const getGithubIdByUsername = async (username) => {
   }
 };
 
-export const updateUserPassword = async (payload) => {
-  try {
-    username = payload.username;
-    const user = await User.findOne({ username });
-    if (!user) {
-      throw new Error('User not found');
-    }
-    user.password = newPassword;
-    await user.save();
-    console.log(`Password for user ${username} updated successfully.`);
-    return { message: 'Password updated successfully' };
-  } catch (error) {
-    throw new Error(`Error updating password: ${error.message}`);
-  }
-};
-
 export async function SaveGithubData(profile) {
   try {
     const { _json } = profile;
@@ -88,7 +35,7 @@ export async function SaveGithubData(profile) {
       githubId: profile.id,
       username: profile.username || _json.login,
       name: profile.displayName || _json.name || "",
-      email: _json.email || null,
+      email: _json.email,
       profileUrl: _json.html_url,
       avatarUrl: _json.avatar_url,
       accessToken: profile.accessToken,
@@ -105,15 +52,15 @@ export async function SaveGithubData(profile) {
   }
 };
 
-export async function GetAccessToken(username) {
+export async function GetAccessToken(githubId) {
   try {
-    const user = await User.find({ username });
-    if (!user || user.length === 0) {
-      throw new Error(`User with username ${username} not found`);
+    const user = await User.findOne({ githubId });
+    if (!user) {
+      throw new Error(`User with githubId ${githubId} not found`);
     }
-    const accessToken = user[0].accessToken;
+    const accessToken = user.accessToken;
     if (!accessToken) {
-      throw new Error(`Access token for user ${username} not found`);
+      throw new Error(`Access token for user ${githubId} not found`);
     }
     return accessToken;
   }
@@ -123,13 +70,13 @@ export async function GetAccessToken(username) {
   }
 };
 
-export async function SaveReadmeForRepo(repoUrl, username, readme) {
+export async function SaveReadmeForRepo(repoUrl, githubId, readme) {
   try {
     // Check if the repo already exists if not create a new one
-    const existingRepo = await GitRepo.findOne({ repoUrl, username });
+    const existingRepo = await GitRepo.findOne({ repoUrl, githubId });
     if (!existingRepo) {
       const newRepo = new GitRepo({
-        username: username,
+        githubId: githubId,
         repoUrl: repoUrl,
         readme: readme,
       });
@@ -146,30 +93,30 @@ export async function SaveReadmeForRepo(repoUrl, username, readme) {
   throw new Error(`Error saving README for repository: ${error.message}`);
 }};
 
-export async function DeductCreditTokens(username, tokens) {
+export async function DeductCreditTokens(githubId, tokens) {
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ githubId });
     if (!user) {
-      throw new Error(`User with username ${username} not found`);
+      throw new Error(`User with githubId ${githubId} not found`);
     }
     if (user.credit_tokens < tokens) {
-      throw new Error(`Insufficient credit tokens for user ${username}`);
+      throw new Error(`Insufficient credit tokens for user ${githubId}`);
     }
     user.credit_tokens -= tokens;
     await user.save();
-    console.log(`Deducted ${tokens} credit tokens from user ${username}. Remaining: ${user.credit_tokens}`);
+    console.log(`Deducted ${tokens} credit tokens from user ${githubId}. Remaining: ${user.credit_tokens}`);
     return user.credit_tokens;
   }catch (error) {
     console.error("Error deducting credit tokens:", error.message);
     throw new Error(`Error deducting credit tokens: ${error.message}`);
 }};
 
-export async function GetReadmeForRepo( username) {
+export async function GetReadmeForRepo(githubId) {
   try {
     // Find All repository for the user
-    const repos = await GitRepo.find({ username }).select('repoUrl readme');
+    const repos = await GitRepo.find({ githubId }).select('repoUrl readme');
     if (!repos) {
-      throw new Error(`No repository found for user ${username}`);
+      throw new Error(`No repository found for user ${githubId}`);
     }
     return repos;
   } catch (error) {
@@ -177,3 +124,15 @@ export async function GetReadmeForRepo( username) {
     throw new Error(`Error retrieving README for repository: ${error.message}`);
   }
 };
+
+export async function GetUserProfile(githubId) {
+  try {
+    const user = await User.findOne({ githubId });
+    if (!user) {
+      throw new Error(`User with githubId ${githubId} not found`);
+    }
+    return user;
+  } catch (error) {
+    throw new Error(`Error retrieving user profile: ${error.message}`);
+  }
+}

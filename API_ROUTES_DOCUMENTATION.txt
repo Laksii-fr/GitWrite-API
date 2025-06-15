@@ -1,0 +1,221 @@
+GITWRITE API ROUTES DOCUMENTATION
+==================================
+
+Base URL: http://localhost:5000 (or your deployed URL)
+
+AUTHENTICATION
+--------------
+Most routes require JWT authentication via the authMiddleware.
+Include the JWT token in the Authorization header: "Bearer <token>"
+
+1. GITHUB AUTHENTICATION ROUTES (/api/github)
+=============================================
+
+1.1 GET /api/github/auth
+Description: Initiates GitHub OAuth authentication flow
+Authentication: None required
+Request Body: None
+Query Parameters: None
+Response: Redirects to GitHub OAuth page
+
+1.2 GET /api/github/auth/callback
+Description: GitHub OAuth callback endpoint
+Authentication: None required
+Request Body: None
+Query Parameters: code (provided by GitHub)
+Response:
+Success (200):
+{
+  "success": true,
+  "message": "GitHub OAuth successful",
+  "token": "jwt_token_here",
+  "githubId": "github_user_id"
+}
+
+Error Responses:
+- 401: Authentication failed
+- 400: Invalid profile data
+- 500: Server errors
+
+2. PROFILE ROUTES (/api/profile)
+================================
+
+2.1 GET /api/profile/get-user-profile
+Description: Get user profile information
+Authentication: Required (JWT token)
+Request Body: None
+Headers: Authorization: Bearer <jwt_token>
+Response:
+Success (200):
+{
+  "success": true,
+  "message": "User profile fetched successfully",
+  "data": {
+    // User profile data
+  }
+}
+
+Error Responses:
+- 401: Unauthorized (missing or invalid token)
+- 500: Server error
+
+3. README GENERATOR ROUTES (/api/ai)
+====================================
+
+3.1 GET /api/ai/health
+Description: Health check endpoint
+Authentication: None required
+Request Body: None
+Response:
+{
+  "success": true,
+  "message": "Server is running",
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+
+3.2 GET /api/ai/simple-test
+Description: Simple test endpoint
+Authentication: None required
+Request Body: None
+Response:
+{
+  "success": true,
+  "message": "Simple test route working"
+}
+
+3.3 GET /api/ai/test-auth
+Description: Test JWT authentication
+Authentication: Required (JWT token)
+Request Body: None
+Headers: Authorization: Bearer <jwt_token>
+Response:
+{
+  "success": true,
+  "message": "JWT authentication working",
+  "githubId": "github_user_id"
+}
+
+3.4 POST /api/ai/generate-readme
+Description: Generate README for a repository
+Authentication: Required (JWT token)
+Request Body:
+{
+  "repoUrl": "https://github.com/username/repository-name"
+}
+Headers: Authorization: Bearer <jwt_token>
+Response:
+Success (201):
+{
+  "Status": "Success",
+  "message": "README generated successfully",
+  "Data": {
+    // Generated README content
+  }
+}
+
+Error Responses:
+- 400: Missing repoUrl parameter
+- 500: Server error during README generation
+
+4. GIT OPERATIONS ROUTES (/api/git)
+===================================
+
+4.1 POST /api/git/get-all-repo
+Description: Get all repositories for the authenticated user
+Authentication: Required (JWT token)
+Request Body: None
+Headers: Authorization: Bearer <jwt_token>
+Response:
+Success (201):
+{
+  "Status": "Success",
+  "message": "Repositories fetched successfully",
+  "Data": [
+    // Array of repository objects
+  ]
+}
+
+Error Responses:
+- 500: Failed to fetch repositories
+
+4.2 POST /api/git/commit-readme
+Description: Commit README content to a repository
+Authentication: Required (JWT token)
+Request Body:
+{
+  "repoUrl": "https://github.com/username/repository-name",
+  "readmeContent": "# README Content\n\nThis is the README content..."
+}
+Headers: Authorization: Bearer <jwt_token>
+Response:
+Success (201):
+{
+  "Status": "Success",
+  "message": "README committed successfully",
+  "Data": {
+    // Commit result data
+  }
+}
+
+Error Responses:
+- 400: Missing repoUrl or readmeContent
+- 500: Failed to commit README
+
+4.3 GET /api/git/get-all-readmes
+Description: Get all README files for the authenticated user
+Authentication: Required (JWT token)
+Request Body: None
+Headers: Authorization: Bearer <jwt_token>
+Response:
+Success (200):
+{
+  "Status": "Success",
+  "message": "Repositories fetched successfully",
+  "Data": [
+    // Array of repository objects with README data
+  ]
+}
+
+Error Responses:
+- 404: No repositories found for user
+- 500: Failed to fetch repositories
+
+SUMMARY OF ROUTES
+=================
+
+Public Routes (No Authentication):
+- GET /api/github/auth
+- GET /api/github/auth/callback
+- GET /api/ai/health
+- GET /api/ai/simple-test
+
+Protected Routes (JWT Authentication Required):
+- GET /api/profile/get-user-profile
+- GET /api/ai/test-auth
+- POST /api/ai/generate-readme
+- POST /api/git/get-all-repo
+- POST /api/git/commit-readme
+- GET /api/git/get-all-readmes
+
+AUTHENTICATION FLOW
+==================
+1. Call GET /api/github/auth to initiate OAuth
+2. User is redirected to GitHub for authentication
+3. GitHub redirects back to /api/github/auth/callback
+4. Upon successful authentication, a JWT token is returned
+5. Use this JWT token in the Authorization header for protected routes
+
+ERROR HANDLING
+==============
+All routes return consistent error responses:
+- 400: Bad Request (missing parameters)
+- 401: Unauthorized (invalid/missing token)
+- 404: Not Found
+- 500: Internal Server Error
+
+Each error response includes:
+{
+  "success": false,
+  "message": "Error description",
+  "error": "Error code (optional)"
+} 

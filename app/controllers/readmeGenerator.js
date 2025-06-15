@@ -2,15 +2,15 @@
 import { repoReaderAgent } from "../agents/repoReaderAgent.js";
 import { featureExtractorAgent } from "../agents/featureExtractorAgent.js";
 import { readmeGeneratorAgent } from "../agents/readmeGeneratorAgent.js";
-import { GetAccessToken, SaveReadmeForRepo, DeductCreditTokens } from "../utils/mongo_utils.js";
+import { GetAccessToken, SaveReadmeForRepo } from "../utils/mongo_utils.js";
 
-export async function generateReadme(repoUrl, username) {
+export async function generateReadme(repoUrl, githubId) {
     try {
-        console.log(`[generateReadme] Called with repoUrl: ${repoUrl}, username: ${username}`);
+        console.log(`[generateReadme] Called with repoUrl: ${repoUrl}, githubId: ${githubId}`);
 
-        const accessToken = await GetAccessToken(username);
+        const accessToken = await GetAccessToken(githubId);
         if (!accessToken) {
-            console.error("[generateReadme] No access token found for user:", username);
+            console.error("[generateReadme] No access token found for user:", githubId);
             throw new Error("Access token is required");
         }
         console.log("[generateReadme] Access token retrieved successfully");
@@ -38,9 +38,8 @@ export async function generateReadme(repoUrl, username) {
         }
 
         console.log("[generateReadme] README length:", readmeResult.readme.length);
-        await SaveReadmeForRepo(repoUrl, username, readmeResult.readme);
-        await DeductCreditTokens(username, 1);
-        return readmeResult.readme;
+        await SaveReadmeForRepo(repoUrl, githubId, readmeResult.readme);
+        return { success: true, readme: readmeResult.readme };
 
     } catch (err) {
         console.error("Error generating README:", err);
