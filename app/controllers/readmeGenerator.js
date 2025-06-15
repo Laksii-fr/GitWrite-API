@@ -38,7 +38,7 @@ export async function generateReadme(repoUrl, githubId) {
         }
 
         console.log("[generateReadme] README length:", readmeResult.readme.length);
-        await SaveReadmeForRepo(repoUrl, githubId, readmeResult.readme);
+        // await SaveReadmeForRepo(repoUrl, githubId, readmeResult.readme);
         return { success: true, readme: readmeResult.readme };
 
     } catch (err) {
