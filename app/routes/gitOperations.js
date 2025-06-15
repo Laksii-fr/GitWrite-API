@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { getUserRepos, CommitGitReadme, getUserReadmes } from '../controllers/gitOperations.js';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { authMiddleware } from '../middlewares/authmiddleware.js';
 
 // Simple test route to verify git operations routes are working
 router.get("/test", (req, res) => {
