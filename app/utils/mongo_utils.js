@@ -31,6 +31,8 @@ export async function SaveGithubData(profile) {
   try {
     const { _json } = profile;
 
+    console.log("Saving GitHub data for user:", profile);
+
     const newUser = new User({
       githubId: profile.id,
       username: profile.username || _json.login,
